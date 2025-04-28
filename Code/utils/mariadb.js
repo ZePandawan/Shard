@@ -102,10 +102,34 @@ async function deleteRow(conn, table, condition){
     }
 }
 
+/**
+ * Créer une nouvelle table dans la base de données.
+ * @param {import('mariadb').Connection} conn - La connexion à la base de données.
+ * @param {string} tableName - Le nom de la table.
+ * @param {Object} columns - Les colonnes de la table avec leurs types.
+ * @returns {Promise<import('mariadb').QueryResult>} Le résultat de la requête.
+ * @throws {Error} Si la création de la table échoue.
+ */
+async function createTable(conn, tableName, columns) {
+    try {
+        const columnDefinitions = Object.entries(columns)
+            .map(([name, type]) => `${name} ${type}`)
+            .join(', ');
+        const query = `CREATE TABLE IF NOT EXISTS ${tableName} (${columnDefinitions})`;
+        const res = await conn.query(query);
+        console.log('Table created:', res);
+        return res;
+    } catch (err) {
+        console.error('[DB ERROR] Error creating table:', err);
+        throw err;
+    }
+}
+
 module.exports = {
     connectToDatabase,
     disconnectFromDatabase,
     createRow,
     updateRow,
-    deleteRow
+    deleteRow,
+    createTable
 };
