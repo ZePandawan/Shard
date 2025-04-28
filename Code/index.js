@@ -11,6 +11,14 @@ const statuses = [
 let count_status = 0;
 
 
+
+/**
+ * Déclaration API youtube pour recherche dernière vidéo
+ */
+const { checkForNewVideos } = require("./utils/youtube");
+
+
+
 // FR : Créer une nouvelle instance de client
 // EN : Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds,
@@ -44,6 +52,12 @@ client.once('ready',() => {
         let randomStatus = statuses[count_status];
         count_status !== statuses.length-1 ? count_status++ : count_status = 0;
         client.user.setActivity(randomStatus);
+    }, 5000);
+
+
+
+    setInterval(() => {
+        checkForNewVideos();
     }, 5000);
 
 });
