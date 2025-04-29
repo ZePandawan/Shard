@@ -14,6 +14,12 @@ async function checkForNewVideos(client){
     const latestVideoDB = await getVideoInDb(latestVideoYoutube.resourceId.videoId);
 
     if(latestVideoDB.length === 0){
+        const videoDetails = await getVideoDetails(latestVideoYoutube.resourceId.videoId);
+        //console.log(videoDetails);
+        const duration = videoDetails.contentDetails.duration;
+        const isShortLength = /^PT([0-2]M[0-5]?[0-9]S?|[0-5]?[0-9]S)$/.test(duration);
+        
+        if(isShortLength) return;
         const result = await writeNewRowInDb(latestVideoYoutube);
         if(result){
             const conn = await mariadb.connectToDatabase();
@@ -104,6 +110,19 @@ async function getChannelInfo(channelId) {
         return response.data.items[0];
     } catch (error) {
         console.error('Erreur lors de la récupération des informations de la chaîne :', error);
+        throw error;
+    }
+}
+
+async function getVideoDetails(videoId) {
+    try {
+        const response = await youtube.videos.list({
+            part: 'contentDetails',
+            id: videoId
+        });
+        return response.data.items[0];
+    } catch (error) {
+        console.error('Erreur lors de la récupération des détails de la vidéo :', error);
         throw error;
     }
 }
