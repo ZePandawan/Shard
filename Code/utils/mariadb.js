@@ -19,7 +19,7 @@ async function connectToDatabase(){
     let conn;
     try{
         conn = await pool.getConnection();
-        console.log('Connected to the database!');
+        //console.log('Connected to the database!');
         return conn;
     }catch(err){
         console.error('[DB ERROR] Error connecting to the databse:', err);
@@ -34,7 +34,7 @@ async function connectToDatabase(){
 async function disconnectFromDatabase(conn){
     if(conn){
         await conn.end();
-        console.log('Disconnected from the database!')
+        //console.log('Disconnected from the database!')
     }
 }
 
@@ -125,11 +125,41 @@ async function createTable(conn, tableName, columns) {
     }
 }
 
+/**
+ * Effectuer une requête SELECT sur la table spécifiée.
+ * @param {import('mariadb').Connection} conn - La connexion à la base de données.
+ * @param {string} table - Le nom de la table.
+ * @param {string[]} columns - Les colonnes à sélectionner.
+ * @param {string} condition - La condition pour la sélection (facultatif).
+ * @returns {Promise<import('mariadb').QueryResult>} Le résultat de la requête.
+ * @throws {Error} Si la requête échoue.
+ */
+async function selectRows(conn, table, columns, condition = '') {
+    try {
+        const columnsStr = columns.join(', ');
+        const query = `SELECT ${columnsStr} FROM ${table}${condition ? ` WHERE ${condition}` : ''}`;
+        const res = await conn.query(query);
+        //console.log('Rows selected:', res);
+        return res;
+    } catch (err) {
+        console.error('[DB ERROR] Error selecting rows:', err);
+        throw err;
+    }
+}
+
+async function getChannelNotif(conn, type){
+    const query = `SELECT * FROM CHANNELS_C WHERE C_TYPE = '${type}'`;
+    const res = await conn.query(query);
+    return res[0].C_ID.toString();
+}
+
 module.exports = {
     connectToDatabase,
     disconnectFromDatabase,
     createRow,
     updateRow,
     deleteRow,
-    createTable
+    createTable,
+    selectRows,
+    getChannelNotif
 };

@@ -57,7 +57,7 @@ client.once('ready',() => {
 
 
     setInterval(() => {
-        checkForNewVideos();
+        checkForNewVideos(client);
     }, 5000);
 
 });
