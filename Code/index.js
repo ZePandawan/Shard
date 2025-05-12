@@ -55,11 +55,11 @@ client.once('ready',() => {
     }, 5000);
 
 
-
-    setInterval(() => {
+    // Uncomment this when release
+    /*setInterval(() => {
         checkForNewVideos(client);
     }, 5000);
-
+    */
 });
 
 
