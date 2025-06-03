@@ -17,6 +17,8 @@ let count_status = 0;
  */
 const { checkForNewVideos } = require("./utils/youtube");
 
+const { connectToApi } = require("./utils/pandascore");
+
 
 
 // FR : Créer une nouvelle instance de client
@@ -60,6 +62,11 @@ client.once('ready',() => {
         checkForNewVideos(client);
     }, 5000);
     */
+    
+    
+    setInterval(() => {
+        connectToApi();
+    }, 10000);
 });
 
 
