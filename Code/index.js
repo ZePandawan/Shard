@@ -1,7 +1,7 @@
 // FR : Ajout de la classe discord.js dans mon répertoire + de mon token dans mon fichier config.json
 // EN : Require the necessary discord.js classes
 const { Client, Intents, GatewayIntentBits, Collection, MessageMentions, GuildMemberManager, EmbedBuilder, Activity, ActivityType, ActionRowBuilder, ButtonBuilder} = require('discord.js');
-const { token } = require("../Config/config.json");
+const { token, callbackPort } = require("../Config/config.json");
 const fs = require("fs");
 
 const statuses = [
@@ -10,12 +10,50 @@ const statuses = [
 ];
 let count_status = 0;
 
+/*************************************************** CALLBACK *************************************************************/
 
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+app.use(bodyParser.json());
+
+app.post('/webhook', async (req, res) => {
+    const payload = req.body;
+    console.log('Nouveau webhook reçu :', payload);
+  
+    try {
+      // Exemple : extraire les infos principales
+      const { firstName, lastName } = payload.payer;
+      const amount = (payload.amount / 100).toFixed(2);
+  
+      const message = `🎉 Nouveau don de **${firstName} ${lastName}** : **${amount}€** ! Merci 🙏`;
+  
+      const channel = await discordClient.channels.fetch(process.env.DISCORD_CHANNEL_ID);
+      await channel.send(message);
+  
+      res.sendStatus(200); // HelloAsso attend un 200 OK
+    } catch (err) {
+      console.error('Erreur en traitant le webhook :', err);
+      res.sendStatus(500);
+    }
+  });
+  
+  app.listen(callbackPort, () => {
+    console.log(`Serveur webhook en écoute sur le port ${callbackPort}`);
+  });
+
+/**************************************************************************************************************************/
 
 /**
  * Déclaration API youtube pour recherche dernière vidéo
  */
 const { checkForNewVideos } = require("./utils/youtube");
+
+/**
+ * Déclaration API helloasso pour recherche dons
+ */
+const { checkForNewDonation } = require("./utils/helloasso")
 
 
 
@@ -55,9 +93,14 @@ client.once('ready',() => {
     }, 5000);
 
 
+    // FR : Regarde si une nouvelle vidéo est sortie
+    // EN : Looking for a new video
+    setInterval(() => {
+//        checkForNewVideos();
+    }, 5000);
 
     setInterval(() => {
-        checkForNewVideos();
+        checkForNewDonation();
     }, 5000);
 
 });
